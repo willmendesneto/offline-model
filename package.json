@@ -1,0 +1,45 @@
+{
+  "name": "offline-model",
+  "version": "1.0.1",
+  "description": "Recurring schedule for async tasks. Schedule next execution only after the current one finishes",
+  "main": "lib/offline-model.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha",
+    "lint": "./node_modules/.bin/eslint ./lib ./test",
+    "pretest": "npm run lint",
+    "coverage": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha"
+  },
+  "keywords": [
+    "offline",
+    "model",
+    "service",
+    "model",
+    "localStorage",
+    "sessionStorage",
+    "module"
+  ],
+  "author": "Will Mendes <willmendesneto@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/willmendesneto/offline-model"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "coveralls": "^2.11.9",
+    "eslint": "^2.9.0",
+    "istanbul": "^0.4.3",
+    "jsdom": "^9.4.1",
+    "mocha": "^2.4.5",
+    "sinon": "^1.17.4"
+  },
+  "engines": {
+    "node": ">=4.1.0"
+  },
+  "files": [
+    "lib",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ]
+}
