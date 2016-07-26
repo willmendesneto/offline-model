@@ -14,7 +14,7 @@ const resetMock = function() {
   ];
 };
 
-describe.only('Service: OfflineModel', function () {
+describe('Service: OfflineModel', function () {
 
   // instantiate service
   var myMock;
