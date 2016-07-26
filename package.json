@@ -6,7 +6,8 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha",
     "lint": "./node_modules/.bin/eslint ./lib ./test",
-    "pretest": "npm run lint",
+    "pretest": "npm run lint-focused-test && npm run lint",
+    "lint-focused-test": "! git --no-pager grep -nE '^\\s*?(describe|it).only' -- ./test/*.js",
     "coverage": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha"
   },
   "keywords": [
