@@ -41,7 +41,7 @@ function concat(opts) {
     '  } else {  ',
     '    window.OfflineModel = OfflineModel;  ',
     '  }  ',
-    '})(global || window);'
+    '})(!!window ? window : global);'
   ].join(EOL);
 
 	fs.writeFileSync(distPath, header + out.join(EOL) + footer, FILE_ENCODING);
