@@ -1,0 +1,6 @@
+.*
+*.{yml,md,log}
+build.js
+app
+node_modules
+test

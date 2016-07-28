@@ -1,0 +1,27 @@
+{
+  "name": "ffline-model",
+  "version": "1.0.0",
+  "author": "Wilson Mendes <willmendesneto@gmail.com>",
+  "keywords": [
+    "offline",
+    "model",
+    "service",
+    "model",
+    "localStorage",
+    "sessionStorage",
+    "module"
+  ],
+  "ignore": [
+    ".*",
+    "*.{yml,md,log}",
+    "build.js",
+    "app",
+    "node_modules",
+    "test"
+  ],
+  "main": "index.js",
+  "license": "MIT",
+  "description": "OfflineModel: Your module for Offline operations with Javascript",
+  "homepage": "https://github.com/willmendesneto/offline-model",
+  "dependencies": {}
+}

@@ -1,5 +1,15 @@
-(function(window) {
-/* globals JSON, window */
+(function (root, factory) {
+  if (typeof define === "function" && define.amd) {
+    // AMD. Register as an anonymous module.
+    define([], factory);
+  } else if (typeof module !== "undefined" && module.exports) {
+    // CommonJS/Node module
+    module.exports = factory();
+  } else {
+    // Browser globals
+    root.OfflineModel = factory();
+  }
+}(this, function () {/* globals JSON, window */
 'use strict';
 
 /**
@@ -232,15 +242,5 @@ var OfflineModel = {
     return OfflineStorage.clearAll();
   }
 };
-  
-  if (typeof define !== "undefined" && define.amd) {  
-    // AMD. Register as an anonymous module.  
-    define(function() {  
-      return OfflineModel;  
-    });  
-  } else if (typeof module !== "undefined" && module.exports) {  
-    module.exports = OfflineModel;  
-  } else {  
-    window.OfflineModel = OfflineModel;  
-  }  
-})(!!window ? window : global);
+return OfflineModel;
+}));
