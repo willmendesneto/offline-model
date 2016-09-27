@@ -9,8 +9,8 @@
     // Browser globals
     root.OfflineModel = factory();
   }
-}(this, function () {/* globals JSON, window */
-'use strict';
+}(this, function () {
+"use strict";/* globals JSON, window */
 
 /**
  * Provide a service for Crypt/Decrypt offline storage (localStorage/sessionStorage) data in application
@@ -64,7 +64,7 @@ var OfflineStorage = {
    */
   decrypt: function(encrypted) {
     var decrypted = JSON.parse(encrypted);
-    return decrypted;
+    return !decrypted.expiry || decrypted.expiry <=Date.now() ? decrypted : null;
   },
 
   /**
@@ -85,10 +85,16 @@ var OfflineStorage = {
    * @return {Boolean}
    * @method set
    */
-  set: function(key, object) {
+  set: function(key, object, expiryInMiliseconds) {
     if (!object) {
       this.remove(key);
       return false;
+    }
+
+    if (expiryInMiliseconds) {
+      var dateObj = new Date();
+      dateObj += expiryInMiliseconds;
+      object.expiry = new Date(dateObj);
     }
 
     var encrypted = this.encrypt(object);
@@ -118,7 +124,6 @@ var OfflineStorage = {
   }
 };
 
-'use strict';
 
 
 const maxListItems = function (input, elementKey) {

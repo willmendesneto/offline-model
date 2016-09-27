@@ -41,7 +41,19 @@ describe('Service: OfflineStorage', function () {
 
     describe('decrypt', function(){
       it('should returns a json object decrypted', function () {
-        expect(OfflineStorage.decrypt(JSON.stringify(dataString))).to.deep.equal(dataString);
+        var decriptedData = OfflineStorage.decrypt(JSON.stringify(Object.assign(dataString, {expiry: null})));
+        expect(decriptedData).to.have.property('testValue');
+        expect(decriptedData).to.have.property('expiry');
+        expect(decriptedData.testValue).to.be.equal(dataString.testValue);
+        expect(decriptedData.expiry).to.be.null;
+      });
+
+      it('should return null if data is expired', function () {
+        var expiredData = dataString;
+        expiredData.expiry = new Date();
+        expiredData.expiry -= 1000;
+        expiredData.expiry = new Date(expiredData.expiry);
+        expect(OfflineStorage.decrypt(JSON.stringify(expiredData))).to.equal(null);
       });
     });
 
@@ -59,6 +71,21 @@ describe('Service: OfflineStorage', function () {
       it('should returns the original json object', function () {
         OfflineStorage.set(key, dataString);
         expect(OfflineStorage.get(key)).to.deep.equal(dataString);
+      });
+
+      describe('When a data is expired', function() {
+        beforeEach(function() {
+          var expiredData = dataString;
+          expiredData.expiry = new Date();
+          expiredData.expiry -= 1000;
+          expiredData.expiry = new Date(expiredData.expiry);
+          OfflineStorage.set(key, expiredData, 1000);
+        });
+
+        it('should return null if data is expired', function () {
+          OfflineStorage.set(key, dataString);
+          expect(OfflineStorage.get(key)).to.equal(null);
+        });
       });
     });
 
@@ -94,7 +121,11 @@ describe('Service: OfflineStorage', function () {
 
     describe('decrypt', function(){
       it('should returns a json object decrypted', function () {
-        expect(OfflineStorage.decrypt(JSON.stringify(dataString))).to.deep.equal(dataString);
+        var decriptedData = OfflineStorage.decrypt(JSON.stringify(Object.assign(dataString, {expiry: null})));
+        expect(decriptedData).to.have.property('testValue');
+        expect(decriptedData).to.have.property('expiry');
+        expect(decriptedData.testValue).to.be.equal(dataString.testValue);
+        expect(decriptedData.expiry).to.be.null;
       });
     });
 
