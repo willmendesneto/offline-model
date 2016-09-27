@@ -22,7 +22,7 @@ function concat(opts) {
     });
 
     fileContent = fileContent.split(EOL).filter(function(lineContent) {
-      return lineContent.indexOf('require(') === - 1;
+      return lineContent.indexOf('require(') === - 1 && lineContent.indexOf('use strict') === - 1;
     }).join(EOL);
     fileContent = fileContent.replace('module.exports', 'var ' + moduleName);
     return fileContent;
@@ -40,7 +40,8 @@ function concat(opts) {
     '    // Browser globals',
     '    root.OfflineModel = factory();',
     '  }',
-		'}(this, function () {'
+		'}(this, function () {',
+    '"use strict";'
 	].join(EOL);
   footer = [
     'return OfflineModel;',
