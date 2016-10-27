@@ -77,6 +77,8 @@ var params = {
   primaryKey: '_id',
   // Fields mapped for store
   fields: ['_id', 'name', 'address', 'phone'],
+  // Expiry time in miliseconds
+  expiry: 3000,
   // you can add new methods via params too
   myMethod: function() {
     console.log('My method is working!');

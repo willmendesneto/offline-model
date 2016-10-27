@@ -2,6 +2,7 @@
 
 const expect = require('chai').expect;
 const OfflineStorage = require('../lib/offline-storage');
+const sinon = require('sinon');
 
 describe('Service: OfflineStorage', function () {
 
@@ -9,9 +10,11 @@ describe('Service: OfflineStorage', function () {
   var secret,
     storageType,
     key,
-    dataString;
+    dataString,
+    sandbox;
 
   beforeEach(function () {
+    sandbox = sinon.sandbox.create();
     secret = 'secret';
     key = 'key';
     dataString = { testValue: 'test'};
@@ -41,19 +44,21 @@ describe('Service: OfflineStorage', function () {
 
     describe('decrypt', function(){
       it('should returns a json object decrypted', function () {
-        var decriptedData = OfflineStorage.decrypt(JSON.stringify(Object.assign(dataString, {expiry: null})));
+        var mockedData = Object.assign({}, { data: dataString, expiry: null});
+        var decriptedData = OfflineStorage.decrypt(JSON.stringify(mockedData));
         expect(decriptedData).to.have.property('testValue');
-        expect(decriptedData).to.have.property('expiry');
+        expect(decriptedData).to.not.have.property('expiry');
         expect(decriptedData.testValue).to.be.equal(dataString.testValue);
-        expect(decriptedData.expiry).to.be.null;
+        expect(decriptedData.expiry).not.to.be.null;
       });
 
       it('should return null if data is expired', function () {
-        var expiredData = dataString;
+        var expiredData = { data: dataString };
         expiredData.expiry = new Date();
         expiredData.expiry -= 1000;
         expiredData.expiry = new Date(expiredData.expiry);
-        expect(OfflineStorage.decrypt(JSON.stringify(expiredData))).to.equal(null);
+        var decriptedData = OfflineStorage.decrypt(JSON.stringify(expiredData));
+        expect(decriptedData).to.equal(null);
       });
     });
 
@@ -75,15 +80,17 @@ describe('Service: OfflineStorage', function () {
 
       describe('When a data is expired', function() {
         beforeEach(function() {
-          var expiredData = dataString;
-          expiredData.expiry = new Date();
-          expiredData.expiry -= 1000;
-          expiredData.expiry = new Date(expiredData.expiry);
-          OfflineStorage.set(key, expiredData, 1000);
+          sandbox.stub(window.localStorage, 'getItem').returns(JSON.stringify({
+            data: [],
+            expiry: (new Date(2010, 10, 10)).getTime()
+          }));
+        });
+
+        afterEach(function() {
+          sandbox.restore();
         });
 
         it('should return null if data is expired', function () {
-          OfflineStorage.set(key, dataString);
           expect(OfflineStorage.get(key)).to.equal(null);
         });
       });
@@ -121,11 +128,21 @@ describe('Service: OfflineStorage', function () {
 
     describe('decrypt', function(){
       it('should returns a json object decrypted', function () {
-        var decriptedData = OfflineStorage.decrypt(JSON.stringify(Object.assign(dataString, {expiry: null})));
+        var mockedData = Object.assign({}, { data: dataString, expiry: null});
+        var decriptedData = OfflineStorage.decrypt(JSON.stringify(mockedData));
         expect(decriptedData).to.have.property('testValue');
-        expect(decriptedData).to.have.property('expiry');
+        expect(decriptedData).to.not.have.property('expiry');
         expect(decriptedData.testValue).to.be.equal(dataString.testValue);
-        expect(decriptedData.expiry).to.be.null;
+        expect(decriptedData.expiry).not.to.be.null;
+      });
+
+      it('should return null if data is expired', function () {
+        var expiredData = { data: dataString };
+        expiredData.expiry = new Date();
+        expiredData.expiry -= 1000;
+        expiredData.expiry = new Date(expiredData.expiry);
+        var decriptedData = OfflineStorage.decrypt(JSON.stringify(expiredData));
+        expect(decriptedData).to.equal(null);
       });
     });
 
@@ -143,6 +160,23 @@ describe('Service: OfflineStorage', function () {
       it('should returns the original json object', function () {
         OfflineStorage.set(key, dataString);
         expect(OfflineStorage.get(key)).to.deep.equal(dataString);
+      });
+
+      describe('When a data is expired', function() {
+        beforeEach(function() {
+          sandbox.stub(window.sessionStorage, 'getItem').returns(JSON.stringify({
+            data: [],
+            expiry: (new Date(2010, 10, 10)).getTime()
+          }));
+        });
+
+        afterEach(function() {
+          sandbox.restore();
+        });
+
+        it('should return null if data is expired', function () {
+          expect(OfflineStorage.get(key)).to.equal(null);
+        });
       });
     });
 

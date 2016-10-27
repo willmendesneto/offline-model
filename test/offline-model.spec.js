@@ -1,9 +1,10 @@
 'use strict';
 
 const expect = require('chai').expect;
+const sinon = require('sinon');
 const OfflineModel = require('../lib/offline-model');
 
-const resetMock = function() {
+var resetMock = function() {
   return [
     {_id: 1, name: 'Allan Benjamin', address: 'St. Claire Avenue, Nº 101', phone: '557188339933'},
     {_id: 2, name: 'Georgia Smith', address: 'St. Claire Avenue, Nº 102', phone: '557188339933'},
@@ -17,20 +18,26 @@ const resetMock = function() {
 describe('Service: OfflineModel', function () {
 
   // instantiate service
-  var myMock;
+  var myMock = [];
+  var params = {};
+  var MyOfflineModel;
+  var sandbox;
 
-  var params = {
-    key: 'myMock',
-    primaryKey: '_id',
-    fields: ['_id', 'name', 'address', 'phone']
-  };
+  beforeEach(function () {
+    sandbox = sinon.sandbox.create();
+    params = {
+      key: 'myMock',
+      primaryKey: '_id',
+      expiry: null,
+      fields: ['_id', 'name', 'address', 'phone']
+    };
+    myMock = resetMock();
+  });
 
   describe('OfflineModel: localStorage', function () {
 
-    var MyOfflineModel;
 
     beforeEach(function () {
-      myMock = resetMock();
       MyOfflineModel = OfflineModel.setStorageType('localStorage')
                                         .init(myMock, params);
     });
@@ -155,15 +162,28 @@ describe('Service: OfflineModel', function () {
       expect(MyOfflineModel.getListItems().length).to.be.equal(0);
     });
 
-  });
+    describe('#getListItems', function() {
+      beforeEach(function() {
+        MyOfflineModel.expiry = 10;
+        sandbox.stub(window.localStorage, 'getItem').returns(JSON.stringify({
+          data: [],
+          expiry: (new Date(2010, 10, 10)).getTime()
+        }));
+      });
 
+      afterEach(function() {
+        sandbox.restore();
+      });
+
+      it('should return null if expired', function() {
+        expect(MyOfflineModel.getListItems()).to.be.null;
+      });
+    });
+  });
 
   describe('OfflineModel: sessionStorage', function () {
 
-    var MyOfflineModel;
-
     beforeEach(function () {
-      myMock = resetMock();
       MyOfflineModel = OfflineModel.setStorageType('sessionStorage')
                                         .init(myMock, params);
     });
@@ -284,6 +304,24 @@ describe('Service: OfflineModel', function () {
 
       MyOfflineModel.clearAll();
       expect(MyOfflineModel.getListItems().length).to.be.equal(0);
+    });
+
+    describe('#getListItems', function() {
+      beforeEach(function() {
+        MyOfflineModel.expiry = 10;
+        sandbox.stub(window.sessionStorage, 'getItem').returns(JSON.stringify({
+          data: [],
+          expiry: (new Date(2010, 10, 10)).getTime()
+        }));
+      });
+
+      afterEach(function() {
+        sandbox.restore();
+      });
+
+      it('should return null if expired', function() {
+        expect(MyOfflineModel.getListItems()).to.be.null;
+      });
     });
 
   });

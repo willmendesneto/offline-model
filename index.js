@@ -64,7 +64,8 @@ var OfflineStorage = {
    */
   decrypt: function(encrypted) {
     var decrypted = JSON.parse(encrypted);
-    return !decrypted.expiry || decrypted.expiry <=Date.now() ? decrypted : null;
+    var expiredDate = new Date(decrypted.expiry);
+    return !decrypted.expiry || expiredDate.getTime() >= Date.now() ? decrypted.data : null;
   },
 
   /**
@@ -90,14 +91,20 @@ var OfflineStorage = {
       this.remove(key);
       return false;
     }
+    var expiry = null;
 
     if (expiryInMiliseconds) {
-      var dateObj = new Date();
+      var dateObj = Date.now();
       dateObj += expiryInMiliseconds;
-      object.expiry = new Date(dateObj);
+      expiry = (new Date(dateObj)).getTime();
     }
 
-    var encrypted = this.encrypt(object);
+    var storedData = {
+      data: object,
+      expiry: expiry
+    };
+
+    var encrypted = this.encrypt(storedData);
     window[this.storageType].setItem(key, encrypted);
     return true;
   },
@@ -143,7 +150,8 @@ var OfflineModel = {
   fields: null,
   key: null,
   secret: 'my-awesome-key',
-  init: function (_items, params) {
+  expiry: null,
+  init: function init(_items, params) {
     params = params || {};
     Object.assign(this, params);
 
@@ -159,7 +167,7 @@ var OfflineModel = {
       _items = this.createValueObjects(_items);
     }
 
-    OfflineStorage.set(this.key, _items);
+    OfflineStorage.set(this.key, _items, this.expiry);
 
     this.setListItems(_items);
 
@@ -196,7 +204,17 @@ var OfflineModel = {
     return this;
   },
   getListItems: function(){
-    return _items;
+    var listItems = _items;
+
+    if (this.expiry) {
+      listItems = OfflineStorage.get(this.key);
+    }
+
+    if (!listItems) {
+      OfflineStorage.remove(this.key);
+    }
+
+    return listItems;
   },
   setFields: function(fields){
     this.fields = fields;
@@ -209,7 +227,7 @@ var OfflineModel = {
     item = this.createValueObject(item);
     item[this.primaryKey] = this.countTotalItems(_items);
     _items.push(item);
-    OfflineStorage.set(this.key, _items);
+    OfflineStorage.set(this.key, _items, this.expiry);
     return _items;
   },
   update: function (item) {
@@ -220,7 +238,7 @@ var OfflineModel = {
       }
       return element;
     });
-    OfflineStorage.set(this.key, _items);
+    OfflineStorage.set(this.key, _items, this.expiry);
     return _items;
   },
   delete: function(index) {
@@ -239,7 +257,7 @@ var OfflineModel = {
     });
 
     this.setListItems(db);
-    OfflineStorage.set(this.key, db);
+    OfflineStorage.set(this.key, db, this.expiry);
     return firstItem;
   },
   clearAll: function() {
