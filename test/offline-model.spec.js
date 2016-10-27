@@ -15,315 +15,163 @@ var resetMock = function() {
   ];
 };
 
-describe('Service: OfflineModel', function () {
+['localStorage', 'sessionStorage'].forEach(function(webStorage) {
 
-  // instantiate service
-  var myMock = [];
-  var params = {};
-  var MyOfflineModel;
-  var sandbox;
+  describe('Service: OfflineModel', function () {
 
-  beforeEach(function () {
-    sandbox = sinon.sandbox.create();
-    params = {
-      key: 'myMock',
-      primaryKey: '_id',
-      expiry: null,
-      fields: ['_id', 'name', 'address', 'phone']
-    };
-    myMock = resetMock();
-  });
-
-  describe('OfflineModel: localStorage', function () {
-
+    // instantiate service
+    var myMock = [];
+    var params = {};
+    var MyOfflineModel;
+    var sandbox;
 
     beforeEach(function () {
-      MyOfflineModel = OfflineModel.setStorageType('localStorage')
-                                        .init(myMock, params);
-    });
-
-    afterEach(function () {
-      MyOfflineModel.clearAll();
-    });
-
-    it('#init', function () {
-      expect(MyOfflineModel.getListItems().length).to.be.equal(6);
-      expect(MyOfflineModel.getKey()).to.be.equal('myMock');
-      expect(MyOfflineModel.getListItems()).to.deep.equal(myMock);
-    });
-
-    it('#countTotalItems', function(){
-      expect(MyOfflineModel.countTotalItems(myMock)).to.be.equal(7);
-    });
-
-    it('#create', function(){
-      var contact = {
-        name: 'This is a test',
-        address: 'Adress test',
-        phone: '557188998877'
+      sandbox = sinon.sandbox.create();
+      params = {
+        key: 'myMock',
+        primaryKey: '_id',
+        expiry: null,
+        fields: ['_id', 'name', 'address', 'phone']
       };
-      expect(MyOfflineModel.create(contact).length).to.be.equal(7);
+      myMock = resetMock();
     });
 
-    it('#update', function(){
-      var contact = {
-        name: 'This is a test',
-        address: 'Adress test',
-        phone: '557188998877',
-        _id: 1
-      };
+    describe('OfflineModel: ' + webStorage, function () {
+      describe('When the component is initializes', function() {
+        beforeEach(function () {
+          MyOfflineModel = OfflineModel.setStorageType(webStorage)
+                                            .init(myMock, params);
+        });
 
-      expect(MyOfflineModel.update(contact).length).to.be.equal(6);
+        afterEach(function () {
+          MyOfflineModel.clearAll();
+        });
 
-      expect(myMock[0].name).to.be.equal('Allan Benjamin');
-      expect(myMock[0].address).to.be.equal('St. Claire Avenue, Nº 101');
-      expect(myMock[0]._id).to.be.equal(1);
-      expect(myMock[0].phone).to.be.equal('557188339933');
+        it('should add all default items in the list', function() {
+          expect(MyOfflineModel.getListItems().length).to.be.equal(6);
+        });
 
-      var item = MyOfflineModel.getListItems()[0];
+        it('should store data based in the given key', function() {
+          expect(MyOfflineModel.getKey()).to.be.equal('myMock');
+        });
 
-      expect(item.name).to.be.equal(contact.name);
-      expect(item.address).to.be.equal(contact.address);
-      expect(item._id).to.be.equal(contact._id);
-      expect(item.phone).to.be.equal(contact.phone);
+        it('should return the default data', function() {
+          expect(MyOfflineModel.getListItems()).to.deep.equal(myMock);
+        });
 
-      expect(item.name !== myMock[0].name).to.be.equal(true);
-      expect(item.address !== myMock[0].address).to.be.equal(true);
-      expect(item.phone !==myMock[0].phone).to.be.equal(true);
-      expect(item._id === myMock[0]._id).to.be.equal(true);
-    });
+        it('should return the total number of items', function(){
+          expect(MyOfflineModel.countTotalItems(myMock)).to.be.equal(7);
+        });
 
-    it('#delete', function(){
-      expect(typeof MyOfflineModel.delete(1) === 'object').to.be.equal(true);
-      expect(MyOfflineModel.delete(5000)).to.be.equal(false);
-    });
+        describe('When a new data is created', function(){
+          beforeEach(function() {
+            this.contact = {
+              name: 'This is a test',
+              address: 'Adress test',
+              phone: '557188998877'
+            };
+          });
 
-    it('_key params validation', function () {
-      var key = 'key-verification';
-      expect(typeof MyOfflineModel.setKey(key) === 'object').to.be.equal(true);
-      expect(MyOfflineModel.getKey()).to.be.equal(key);
-    });
+          it('should return the total numbers of items in the list', function() {
+            expect(MyOfflineModel.create(this.contact).length).to.be.equal(7);
+          });
+        });
 
-    it('_items params validation', function () {
-      var listItems = [
-        {_id: 6, name: 'Joshua Jackson', address: 'St. Claire Avenue, Nº 106', phone: '557188339933'}
-      ];
-      expect(typeof MyOfflineModel.setListItems(listItems) === 'object').to.be.equal(true);
-      expect(MyOfflineModel.getListItems()).to.be.equal(listItems);
-      expect(MyOfflineModel.getListItems().length).to.be.equal(1);
-    });
+        describe('When a old data is updated', function(){
+          beforeEach(function() {
+            this.contact = {
+              name: 'This is a test',
+              address: 'Adress test',
+              phone: '557188998877',
+              _id: 1
+            };
+            MyOfflineModel.update(this.contact);
+          });
 
-    it('#setFields', function () {
-      MyOfflineModel.setFields(['_id', 'name', 'address']);
+          it('should return the same quantity of items in the list', function() {
+            expect(MyOfflineModel.countTotalItems(myMock)).to.be.equal(7);
+          });
 
-      var contact = {
-        _id: '098340984093',
-        name: 'This is a test',
-        address: 'Adress test',
-        phone: '557188998877',
-        country: 'Brazil'
-      };
-      var listItems = MyOfflineModel.getListItems();
-      var listItemsLength = listItems.length;
-      var i = 0;
+          describe('When the updated data is requested', function() {
+            beforeEach(function() {
+              this.item = MyOfflineModel.getListItems()[0];
+            });
 
-      for ( ; listItemsLength > i; i++) {
-        listItems[i] = MyOfflineModel.createValueObject(listItems[i]);
-      }
+            it('should return the updated information', function() {
+              expect(this.item.name).to.be.equal(this.contact.name);
+              expect(this.item.address).to.be.equal(this.contact.address);
+              expect(this.item._id).to.be.equal(this.contact._id);
+              expect(this.item.phone).to.be.equal(this.contact.phone);
+            });
+          });
+        });
 
-      for ( ; listItemsLength > i; i++) {
-        expect(typeof listItems[i].phone === 'undefined').to.be.equal(true);
-      }
+        describe('When a data is removed', function() {
+          it('should return the removed information', function() {
+            expect(typeof MyOfflineModel.delete(1) === 'object').to.be.equal(true);
+          });
 
-      MyOfflineModel.setListItems(myMock)
-                    .setFields(['_id', 'name', 'address', 'phone']);
+          it('should return false if index does NOT exist', function() {
+            expect(MyOfflineModel.delete(5000)).to.be.equal(false);
+          });
+        });
 
-      i = 0;
-      for ( ; listItemsLength > i; i++) {
-        listItems[i] = MyOfflineModel.createValueObject(listItems[i]);
-      }
+        it('When a new `key` value is setted', function () {
+          beforeEach(function() {
+            this.key = 'key-verification';
+          });
 
-      listItems = MyOfflineModel.create(contact);
-      listItemsLength = listItems.length;
-      i = 0;
-      for ( ; listItemsLength > i; i++) {
-        expect(typeof listItems[i].phone !== 'undefined').to.be.equal(true);
-      }
+          it('should return the new key information', function() {
+            expect(MyOfflineModel.getKey()).to.be.equal(this.key);
+          });
+        });
 
-    });
+        describe('When the required fields for create a value object are setted', function () {
+          beforeEach(function() {
+            MyOfflineModel.setFields(['_id', 'name', 'address']);
+            this.contact = {
+              _id: '098340984093',
+              name: 'This is a test',
+              address: 'Adress test',
+              phone: '557188998877',
+              country: 'Brazil'
+            };
+            this.valueObject = MyOfflineModel.createValueObject(this.contact);
+          });
 
-    it('#clearAll', function () {
-      MyOfflineModel = OfflineModel.setStorageType('localStorage')
-                                        .init(myMock, params);
+          it('should restore ONLY the required fields', function() {
+            expect(this.valueObject).to.have.keys('_id', 'name', 'address');
+          });
+        });
 
-      expect(MyOfflineModel.getListItems().length).to.be.equal(6);
+        it('When clear store is required', function () {
+          beforeEach(function() {
+            MyOfflineModel.clearAll();
+          });
 
-      MyOfflineModel.clearAll();
-      expect(MyOfflineModel.getListItems().length).to.be.equal(0);
-    });
+          it('should return an empty list of items', function() {
+            expect(MyOfflineModel.getListItems().length).to.be.equal(0);
+          });
+        });
 
-    describe('#getListItems', function() {
-      beforeEach(function() {
-        MyOfflineModel.expiry = 10;
-        sandbox.stub(window.localStorage, 'getItem').returns(JSON.stringify({
-          data: [],
-          expiry: (new Date(2010, 10, 10)).getTime()
-        }));
-      });
+        describe('When an expired data is requested', function() {
+          beforeEach(function() {
+            MyOfflineModel.expiry = 10;
+            sandbox.stub(window[webStorage], 'getItem').returns(JSON.stringify({
+              data: [],
+              expiry: (new Date(2010, 10, 10)).getTime()
+            }));
+          });
 
-      afterEach(function() {
-        sandbox.restore();
-      });
+          afterEach(function() {
+            sandbox.restore();
+          });
 
-      it('should return null if expired', function() {
-        expect(MyOfflineModel.getListItems()).to.be.null;
+          it('should return null', function() {
+            expect(MyOfflineModel.getListItems()).to.be.null;
+          });
+        });
       });
     });
   });
-
-  describe('OfflineModel: sessionStorage', function () {
-
-    beforeEach(function () {
-      MyOfflineModel = OfflineModel.setStorageType('sessionStorage')
-                                        .init(myMock, params);
-    });
-
-    afterEach(function () {
-      MyOfflineModel.clearAll();
-    });
-
-    it('#init', function () {
-
-      expect(MyOfflineModel.getListItems().length).to.be.equal(6);
-      expect(MyOfflineModel.getKey()).to.be.equal('myMock');
-      expect(MyOfflineModel.getListItems()).to.deep.equal(myMock);
-    });
-
-    it('#countTotalItems', function(){
-      expect(MyOfflineModel.countTotalItems(myMock)).to.be.equal(7);
-    });
-
-    it('#create', function(){
-      var contact = {
-        name: 'This is a test',
-        address: 'Adress test',
-        phone: '557188998877'
-      };
-      expect(MyOfflineModel.create(contact).length).to.be.equal(7);
-    });
-
-    it('#update', function(){
-      var contact = {
-        name: 'This is a test',
-        address: 'Adress test',
-        phone: '557188998877',
-        _id: 1
-      };
-
-      expect(MyOfflineModel.update(contact).length).to.be.equal(6);
-
-      expect(myMock[0].name).to.be.equal('Allan Benjamin');
-      expect(myMock[0].address).to.be.equal('St. Claire Avenue, Nº 101');
-      expect(myMock[0]._id).to.be.equal(1);
-      expect(myMock[0].phone).to.be.equal('557188339933');
-
-      var item = MyOfflineModel.getListItems()[0];
-
-      expect(item.name).to.be.equal(contact.name);
-      expect(item.address).to.be.equal(contact.address);
-      expect(item._id).to.be.equal(contact._id);
-      expect(item.phone).to.be.equal(contact.phone);
-
-      expect(item.name !== myMock[0].name).to.be.equal(true);
-      expect(item.address !== myMock[0].address).to.be.equal(true);
-      expect(item.phone !==myMock[0].phone).to.be.equal(true);
-      expect(item._id === myMock[0]._id).to.be.equal(true);
-    });
-
-    it('#delete', function(){
-      expect(typeof MyOfflineModel.delete(1) === 'object').to.be.equal(true);
-      expect(MyOfflineModel.delete(5000)).to.be.equal(false);
-    });
-
-    it('_key params validation', function () {
-      var key = 'key-verification';
-      expect(typeof MyOfflineModel.setKey(key) === 'object').to.be.equal(true);
-      expect(MyOfflineModel.getKey()).to.be.equal(key);
-    });
-
-    it('_items params validation', function () {
-      var listItems = [
-        {_id: 6, name: 'Joshua Jackson', address: 'St. Claire Avenue, Nº 106', phone: '557188339933'}
-      ];
-      expect(typeof MyOfflineModel.setListItems(listItems) === 'object').to.be.equal(true);
-      expect(MyOfflineModel.getListItems()).to.be.equal(listItems);
-      expect(MyOfflineModel.getListItems().length).to.be.equal(1);
-    });
-
-    it('#setFields', function () {
-      MyOfflineModel.setFields(['_id', 'name', 'address']);
-
-      var contact = {
-        _id: '098340984093',
-        name: 'This is a test',
-        address: 'Adress test',
-        phone: '557188998877',
-        country: 'Brazil'
-      };
-      var listItems = MyOfflineModel.getListItems();
-      var listItemsLength = listItems.length;
-      var i = 0;
-
-      for ( ; listItemsLength > i; i++) {
-        listItems[i] = MyOfflineModel.createValueObject(listItems[i]);
-      }
-
-      for ( ; listItemsLength > i; i++) {
-        expect(typeof listItems[i].phone === 'undefined').to.be.equal(true);
-      }
-
-      MyOfflineModel.setListItems(myMock)
-                    .setFields(['_id', 'name', 'address', 'phone']);
-
-      i = 0;
-      for ( ; listItemsLength > i; i++) {
-        listItems[i] = MyOfflineModel.createValueObject(listItems[i]);
-      }
-
-      listItems = MyOfflineModel.create(contact);
-      listItemsLength = listItems.length;
-      i = 0;
-      for ( ; listItemsLength > i; i++) {
-        expect(typeof listItems[i].phone !== 'undefined').to.be.equal(true);
-      }
-
-    });
-
-    it('#clearAll', function () {
-      expect(MyOfflineModel.getListItems().length).to.be.equal(6);
-
-      MyOfflineModel.clearAll();
-      expect(MyOfflineModel.getListItems().length).to.be.equal(0);
-    });
-
-    describe('#getListItems', function() {
-      beforeEach(function() {
-        MyOfflineModel.expiry = 10;
-        sandbox.stub(window.sessionStorage, 'getItem').returns(JSON.stringify({
-          data: [],
-          expiry: (new Date(2010, 10, 10)).getTime()
-        }));
-      });
-
-      afterEach(function() {
-        sandbox.restore();
-      });
-
-      it('should return null if expired', function() {
-        expect(MyOfflineModel.getListItems()).to.be.null;
-      });
-    });
-
-  });
-
 });

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "commit": "git-cz",
-    "check-coverage": "istanbul check-coverage --statements 96 --branches 88 --functions 100 --lines 96",
+    "check-coverage": "istanbul check-coverage --statements 90 --branches 80 --functions 90 --lines 90",
     "report-coverage": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
     "test": "istanbul cover -x test/spec-helper.js _mocha",
     "test-ci": "istanbul cover -x test/spec-helper.js _mocha -- -R dot",
