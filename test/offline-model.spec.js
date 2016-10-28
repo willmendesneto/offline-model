@@ -63,6 +63,16 @@ var resetMock = function() {
           expect(MyOfflineModel.countTotalItems(myMock)).to.be.equal(7);
         });
 
+        describe('When the default key is changed', function() {
+          beforeEach(function() {
+            MyOfflineModel.setKey('another-key');
+          });
+
+          it('should return the new key added', function() {
+            expect(MyOfflineModel.getKey()).to.be.equal('another-key');
+          });
+        });
+
         describe('When a new data is created', function(){
           beforeEach(function() {
             this.contact = {
