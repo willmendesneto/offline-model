@@ -1,6 +1,6 @@
 {
   "name": "offline-model",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "OfflineModel: Your module for Offline operations with Javascript",
   "main": "index.js",
   "scripts": {
